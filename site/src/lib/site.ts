@@ -127,16 +127,16 @@ export const site: SiteConfig = {
   social: [],
   images: {
     hero: {
-      src: "/images/dr-vikas-formal.jpg",
+      src: "",
       alt: "Dr. Vikas V V (PT), Senior Consultant Physiotherapist",
     },
     about: {
-      src: "/images/dr-vikas-clinical.jpg",
-      alt: "Dr. Vikas V V (PT), physiotherapist, in clinical scrubs",
+      src: "",
+      alt: "Dr. Vikas V V (PT), Senior Consultant Physiotherapist",
     },
     session: {
-      src: "/images/dr-vikas-consult.jpg",
-      alt: "Dr. Vikas V V (PT) during a consultation",
+      src: "",
+      alt: "Home physiotherapy session",
     },
     setting: {
       src: "",

@@ -1,74 +1,68 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
-import { ContactChrome } from "@/components/chrome";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
 import { businessJsonLd, site } from "@/lib/site";
 import "./globals.css";
 
-const sans = Inter({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
 });
 
-const display = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  variable: "--font-jakarta",
-  display: "swap",
-});
+export const viewport: Viewport = {
+  colorScheme: "light",
+  themeColor: "#F8FAFC",
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: site.metaTitle,
   description: site.metaDescription,
   applicationName: site.businessName,
   authors: [{ name: site.doctorName }],
-  creator: site.businessName,
-  category: "health",
-  robots: { index: true, follow: true },
-  alternates: site.publicSiteUrl ? { canonical: site.publicSiteUrl } : undefined,
   openGraph: {
     title: site.metaTitle,
     description: site.metaDescription,
+    siteName: site.businessName,
     locale: "en_IN",
     type: "website",
-    siteName: site.businessName,
-    url: site.publicSiteUrl || undefined,
+    ...(site.publicSiteUrl ? { url: site.publicSiteUrl } : {}),
   },
   twitter: {
     card: "summary_large_image",
     title: site.metaTitle,
     description: site.metaDescription,
   },
-  formatDetection: {
-    telephone: false,
-    email: false,
-    address: false,
-  },
+  ...(site.publicSiteUrl
+    ? {
+        metadataBase: new URL(site.publicSiteUrl),
+        alternates: { canonical: site.publicSiteUrl },
+      }
+    : {}),
 };
 
-export const viewport: Viewport = {
-  themeColor: "#102A43",
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-};
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const jsonLd = JSON.stringify(businessJsonLd()).replace(/</g, "\\u003c");
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const json = JSON.stringify(businessJsonLd()).replace(/</g, "\\u003c");
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable}`}>
-      <body className="overflow-x-clip antialiased">
-        <a className="skip-link" href="#content">
+    <html lang="en" className={`${jakarta.variable} ${inter.variable} h-full`}>
+      <body className="min-h-full bg-paper text-navy antialiased">
+        <a className="skip-link" href="#main">
           Skip to content
         </a>
-        <Header />
         {children}
-        <Footer />
-        <ContactChrome />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: json }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       </body>
     </html>
   );
