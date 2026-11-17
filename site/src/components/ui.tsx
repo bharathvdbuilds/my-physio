@@ -1,94 +1,116 @@
-import type { ReactNode } from "react";
+import Image from "next/image";
+import { ArrowUpRight, Phone } from "lucide-react";
 import { cx } from "@/lib/cx";
-import { messages, site, whatsappHref } from "@/lib/site";
+import { hasImage, site } from "@/lib/site";
+import { LogoMark, WhatsAppIcon } from "./marks";
 
-export function Shell({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cx("mx-auto w-full max-w-[1200px] px-5 sm:px-8", className)}>{children}</div>;
+export function Wordmark({
+  tone = "dark",
+  compact = false,
+}: {
+  tone?: "dark" | "light";
+  compact?: boolean;
+}) {
+  const light = tone === "light";
+  return (
+    <span className="flex items-center gap-3">
+      <LogoMark className="size-11 shrink-0" />
+      <span className="min-w-0 text-left">
+        <span
+          className={cx(
+            "block font-display text-[1.02rem] font-extrabold tracking-[0.08em]",
+            light ? "text-white" : "text-navy",
+          )}
+        >
+          {site.businessName}
+        </span>
+        <span
+          className={cx(
+            "mt-0.5 block text-[0.68rem] font-semibold uppercase tracking-[0.13em]",
+            compact && "max-[380px]:sr-only",
+            light ? "text-white/75" : "text-mist",
+          )}
+        >
+          {site.brandDescriptor}
+        </span>
+      </span>
+    </span>
+  );
 }
 
-export function Eyebrow({ children }: { children: ReactNode }) {
+export function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mb-4 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.18em] text-teal-ink">
-      <span className="h-px w-8 shrink-0 bg-gold" aria-hidden="true" />
+    <p className="inline-flex items-center gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-brand">
+      <span className="size-2 rounded-full bg-lagoon shadow-[0_0_0_4px_rgba(18,168,157,0.16)]" aria-hidden />
       {children}
     </p>
   );
 }
 
-export function SectionHeading({
-  id,
-  eyebrow,
-  title,
-  lede,
-}: {
-  id: string;
-  eyebrow: string;
-  title: string;
-  lede?: string;
-}) {
-  return (
-    <div className="max-w-2xl">
-      <Eyebrow>{eyebrow}</Eyebrow>
-      <h2
-        id={id}
-        className="text-[2rem] leading-[1.12] text-navy sm:text-[2.5rem] lg:text-[2.75rem]"
-      >
-        {title}
-      </h2>
-      {lede ? <p className="mt-4 max-w-xl text-[17px] leading-8 text-mist">{lede}</p> : null}
-    </div>
-  );
-}
+type IconName = "arrow" | "whatsapp" | "phone" | "none";
+type Variant = "primary" | "secondary" | "inverse" | "ghost";
 
-const tones = {
-  navy: "bg-navy text-white hover:bg-[#0c2236]",
-  outline: "border border-[#C5D5E2] bg-white text-navy hover:border-teal",
-  white: "bg-white text-navy hover:bg-ice",
-  whatsapp: "bg-whatsapp text-white hover:bg-[#0b5841]",
-} as const;
-
-export function actionClass(tone: keyof typeof tones = "navy", className?: string) {
-  return cx(
-    "relative inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-5 text-center text-[15px] font-semibold motion-safe:transition-colors",
-    tones[tone],
-    className,
-  );
-}
-
-export function WhatsAppLink({
-  message = messages.general,
-  className,
+export function ActionLink({
+  href,
   children,
-  hint = "Opens WhatsApp",
+  variant = "primary",
+  icon = "arrow",
+  className,
+  ...rest
 }: {
-  message?: string;
+  href: string;
+  children: React.ReactNode;
+  variant?: Variant;
+  icon?: IconName;
   className?: string;
-  children: ReactNode;
-  hint?: string;
-}) {
+} & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
+  const external = href.startsWith("http");
   return (
     <a
-      href={whatsappHref(message)}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={className}
+      href={href}
+      className={cx("btn", `btn-${variant}`, className)}
+      {...rest}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
-      {children}
-      {hint ? <span className="sr-only"> {hint}</span> : null}
+      {icon === "whatsapp" && <WhatsAppIcon className="size-5 shrink-0" />}
+      {icon === "phone" && <Phone className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />}
+      <span>{children}</span>
+      {icon === "arrow" && (
+        <ArrowUpRight className="arrow size-4 shrink-0" strokeWidth={1.75} aria-hidden />
+      )}
     </a>
   );
 }
 
-export function PhoneLink({
+export function Photo({
+  src,
+  alt,
+  priority = false,
+  position = "center 18%",
+  ratio = "aspect-[4/5]",
   className,
-  children,
+  sizes = "(min-width: 1024px) 520px, 92vw",
 }: {
+  src: string;
+  alt: string;
+  priority?: boolean;
+  position?: string;
+  ratio?: string;
   className?: string;
-  children?: ReactNode;
+  sizes?: string;
 }) {
+  if (!hasImage(src)) return null;
   return (
-    <a href={`tel:${site.phoneTel}`} className={className}>
-      {children ?? site.phoneDisplay}
-    </a>
+    <div className={cx("relative overflow-hidden bg-ice", ratio, className)}>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        priority={priority}
+        sizes={sizes}
+        className="object-cover"
+        style={{ objectPosition: position }}
+      />
+    </div>
   );
 }

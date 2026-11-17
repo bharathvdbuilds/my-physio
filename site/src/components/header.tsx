@@ -1,33 +1,30 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { LogoMark, WhatsAppIcon } from "@/components/marks";
-import { actionClass, PhoneLink, WhatsAppLink } from "@/components/ui";
+import { useEffect, useId, useRef, useState } from "react";
+import { messages, nav, whatsappHref } from "@/lib/site";
 import { cx } from "@/lib/cx";
-import { nav, site } from "@/lib/site";
+import { ActionLink, Wordmark } from "./ui";
 
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
+  const [solid, setSolid] = useState(false);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("top");
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setSolid(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    const nodes = nav
+    const sections = nav
       .map((item) => document.getElementById(item.id))
-      .filter((node): node is HTMLElement => Boolean(node));
-    if (nodes.length === 0) return;
-
+      .filter((item): item is HTMLElement => Boolean(item));
+    if (sections.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -35,29 +32,29 @@ export function Header() {
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
         if (visible?.target.id) setActive(visible.target.id);
       },
-      { rootMargin: "-45% 0px -45% 0px", threshold: [0, 0.25, 0.5] },
+      { rootMargin: "-28% 0px -55% 0px", threshold: [0.1, 0.25, 0.5] },
     );
-
-    nodes.forEach((node) => observer.observe(node));
+    sections.forEach((section) => observer.observe(section));
     return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
     if (!open) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const focusable = panelRef.current
-      ? Array.from(panelRef.current.querySelectorAll<HTMLElement>("a, button"))
-      : [];
-    focusable[0]?.focus();
-
+    const root = dialogRef.current;
+    const previous = document.activeElement as HTMLElement | null;
+    const items = () =>
+      Array.from(root?.querySelectorAll<HTMLElement>("a, button") ?? []).filter(
+        (item) => !item.hasAttribute("disabled"),
+      );
+    items()[0]?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setOpen(false);
-        buttonRef.current?.focus();
         return;
       }
-      if (event.key !== "Tab" || focusable.length === 0) return;
+      if (event.key !== "Tab") return;
+      const focusable = items();
+      if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
       if (event.shiftKey && document.activeElement === first) {
@@ -68,105 +65,113 @@ export function Header() {
         first.focus();
       }
     };
-
-    const onResize = () => {
-      if (window.innerWidth >= 1100) setOpen(false);
-    };
-
     document.addEventListener("keydown", onKey);
-    window.addEventListener("resize", onResize);
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = previous;
       document.removeEventListener("keydown", onKey);
-      window.removeEventListener("resize", onResize);
+      document.body.style.overflow = "";
+      previous?.focus();
     };
   }, [open]);
 
-  const close = () => setOpen(false);
+  const barSolid = solid || open;
 
   return (
     <header
       className={cx(
-        "fixed inset-x-0 top-0 z-50 motion-safe:transition-colors",
-        scrolled || open ? "border-b border-line bg-white" : "bg-transparent",
+        "fixed inset-x-0 top-0 z-50 transition-colors duration-300",
+        barSolid ? "border-b border-line bg-white" : "bg-transparent",
       )}
     >
-      <div className="mx-auto flex h-[4.5rem] w-full max-w-[1200px] items-center justify-between gap-4 px-5 sm:px-8">
-        <a href="#top" className="flex min-h-11 min-w-0 items-center gap-3">
-          <LogoMark className="size-10 shrink-0" />
-          <span className="min-w-0">
-            <span className="block font-display text-[15px] tracking-[0.14em] text-navy">
-              {site.businessName}
-            </span>
-            <span className="mt-0.5 hidden text-[11px] font-medium leading-none text-mist min-[400px]:block">
-              {site.brandDescriptor}
-            </span>
-          </span>
+      <div className="shell flex h-[4.5rem] items-center justify-between gap-3">
+        <a href="#top" className="rounded-md" aria-label="MY PHYSIO, home">
+          <Wordmark compact />
         </a>
-
-        <nav aria-label="Primary" className="hidden items-center gap-5 min-[1100px]:flex">
+        <nav className="hidden items-center gap-5 min-[1080px]:flex" aria-label="Primary">
           {nav.map((item) => (
             <a
-              key={item.id}
+              key={item.href}
               href={item.href}
-              aria-current={active === item.id ? "true" : undefined}
+              data-active={active === item.id}
               className={cx(
-                "inline-flex min-h-11 items-center whitespace-nowrap text-[14px] font-medium",
-                active === item.id ? "text-teal-ink" : "text-navy hover:text-brand",
+                "relative py-1 text-[0.92rem] font-medium text-mist transition-colors hover:text-navy",
+                active === item.id && "font-semibold text-navy",
               )}
             >
               {item.label}
+              {active === item.id && (
+                <span className="absolute -bottom-1 left-0 h-0.5 w-full rounded-full bg-lagoon" />
+              )}
             </a>
           ))}
-          <WhatsAppLink className={actionClass("navy", "whitespace-nowrap")}>
-            <WhatsAppIcon className="size-4" />
-            Book Home Visit
-          </WhatsAppLink>
         </nav>
-
-        <button
-          ref={buttonRef}
-          type="button"
-          className="inline-flex size-11 items-center justify-center rounded-2xl text-navy min-[1100px]:hidden"
-          aria-expanded={open}
-          aria-controls={menuId}
-          onClick={() => setOpen((value) => !value)}
-        >
-          <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-          {open ? <X aria-hidden className="size-6" /> : <Menu aria-hidden className="size-6" />}
-        </button>
-      </div>
-
-      {open ? (
-        <div
-          id={menuId}
-          ref={panelRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu"
-          className="fixed inset-x-0 bottom-0 top-[4.5rem] z-50 overflow-y-auto bg-white min-[1100px]:hidden"
-        >
-          <nav aria-label="Mobile" className="flex flex-col px-5 py-4">
-            {nav.map((item) => (
-              <a
-                key={item.id}
-                href={item.href}
-                className="flex min-h-14 items-center border-b border-line font-display text-2xl text-navy"
-                onClick={close}
-              >
-                {item.label}
-              </a>
-            ))}
-            <WhatsAppLink className={actionClass("navy", "mt-6 w-full")} >
-              <WhatsAppIcon className="size-5" />
-              Book Home Visit
-            </WhatsAppLink>
-            <PhoneLink className={actionClass("outline", "mt-3 w-full")}>
-              Call {site.phoneDisplay}
-            </PhoneLink>
-          </nav>
+        <div className="flex items-center gap-2">
+          <ActionLink
+            href={whatsappHref(messages.general)}
+            icon="arrow"
+            className="hidden px-3.5 sm:inline-flex"
+          >
+            Book Home Visit
+          </ActionLink>
+          <button
+            type="button"
+            className="inline-flex size-11 items-center justify-center rounded-xl border border-line bg-white text-navy min-[1080px]:hidden"
+            aria-expanded={open}
+            aria-controls={menuId}
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
+            <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+          </button>
         </div>
-      ) : null}
+      </div>
+      {open && (
+        <div className="fixed inset-0 z-[60] min-[1080px]:hidden">
+          <button className="absolute inset-0 bg-navy/40" aria-label="Close menu" onClick={() => setOpen(false)} />
+          <div
+            ref={dialogRef}
+            id={menuId}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
+            className="absolute inset-y-0 right-0 flex w-[min(100%,22rem)] flex-col bg-white shadow-2xl"
+          >
+            <div className="flex items-center justify-between border-b border-line px-5 py-4">
+              <Wordmark />
+              <button
+                type="button"
+                className="inline-flex size-11 items-center justify-center rounded-xl border border-line"
+                onClick={() => setOpen(false)}
+              >
+                <X className="size-5" aria-hidden />
+                <span className="sr-only">Close menu</span>
+              </button>
+            </div>
+            <nav className="flex flex-1 flex-col gap-1 px-4 py-4" aria-label="Mobile">
+              {nav.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-xl px-3 py-3 text-lg font-medium text-navy hover:bg-ice"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+            <div className="border-t border-line p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <ActionLink
+                href={whatsappHref(messages.general)}
+                icon="whatsapp"
+                className="btn-full"
+                onClick={() => setOpen(false)}
+              >
+                Book Home Visit
+              </ActionLink>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

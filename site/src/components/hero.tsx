@@ -1,79 +1,87 @@
-import { WhatsAppIcon } from "@/components/marks";
-import { Portrait } from "@/components/portrait";
-import { actionClass, Shell, WhatsAppLink } from "@/components/ui";
-import { ratingVerified, site } from "@/lib/site";
+import { House, MapPin, Star } from "lucide-react";
+import { messages, site, whatsappHref } from "@/lib/site";
+import { ActionLink, Eyebrow, Photo } from "./ui";
 
 export function Hero() {
-  const verified = ratingVerified();
-  const road = site.locationLabel.split(",")[0]?.trim() || site.locationLabel;
-
+  const reported = site.googleRatingStatus !== "verified";
   return (
-    <section id="top" className="relative overflow-x-clip bg-ice pt-28 pb-20 md:pt-32">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 hidden w-[44%] bg-white lg:block" />
-      <div aria-hidden="true" className="hero-grid pointer-events-none absolute inset-y-0 right-0 hidden w-[44%] lg:block" />
-      <Shell className="relative grid items-center gap-12 lg:grid-cols-12 lg:gap-8">
-        <div className="min-w-0 lg:col-span-7 lg:py-6">
-          <p className="mb-5 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.18em] text-teal-ink">
-            <span className="h-px w-8 bg-gold" aria-hidden="true" />
-            {site.brandDescriptor}
-          </p>
-          <h1 className="text-[2.35rem] leading-[1.02] text-navy sm:text-5xl lg:text-[3.7rem]">
-            <span className="block">Expert</span>
-            <span className="block">Physiotherapy.</span>
-            <span className="mt-2 block">
-              In the Comfort of <span className="text-teal-ink">Your Home</span>.
+    <section
+      id="top"
+      className="relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#eaf5fa_100%)] pt-24 pb-14 sm:pt-28 lg:pb-20"
+    >
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute -right-20 top-16 hidden h-[540px] w-[540px] lg:block"
+      >
+        <circle cx="270" cy="230" r="190" fill="none" stroke="#12A89D" strokeOpacity="0.28" />
+        <circle cx="310" cy="270" r="96" fill="none" stroke="#176B91" strokeOpacity="0.22" />
+      </svg>
+      <div className="shell relative grid items-center gap-10 lg:grid-cols-12 lg:gap-6">
+        <div className="lg:col-span-7">
+          <Eyebrow>Personalized physiotherapy at home</Eyebrow>
+          <h1 className="settle mt-5 font-display text-[2.25rem] font-semibold leading-[1.05] tracking-[-0.035em] text-navy sm:text-[2.75rem] lg:text-[3.9rem]">
+            <span className="block sm:inline">Expert </span>
+            <span className="block sm:inline">Physiotherapy.</span>
+            <span className="mt-1 block">
+              In the Comfort of <span className="whitespace-nowrap text-lagoon-ink">Your Home.</span>
             </span>
           </h1>
-          <p className="mt-6 max-w-xl text-[17px] leading-8 text-mist">
-            {site.brandExtension} for spine, shoulder, and knee rehabilitation, led by{" "}
-            {site.doctorName}. Home visits are arranged around {road}, {site.city}.
+          <p className="rise d1 mt-5 max-w-xl text-base leading-relaxed sm:text-lg">
+            Personalized physiotherapy care for spine, shoulder, and knee rehabilitation. Get
+            professional attention from Dr. Vikas V V (PT), conveniently at home.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <WhatsAppLink className={actionClass("navy", "w-full sm:w-auto")}>
-              <WhatsAppIcon className="size-5" />
+          <p className="rise d2 mt-4 inline-flex items-center gap-2 text-sm font-semibold text-navy">
+            <MapPin className="size-4 text-lagoon-ink" strokeWidth={1.75} aria-hidden />
+            {site.locationLabel}
+          </p>
+          <div className="rise d3 mt-7 flex flex-col gap-3 sm:flex-row">
+            <ActionLink href={whatsappHref(messages.general)} icon="whatsapp">
               Book a Home Visit
-            </WhatsAppLink>
-            <a href="#services" className={actionClass("outline", "w-full sm:w-auto")}>
+            </ActionLink>
+            <ActionLink href="#services" variant="secondary" icon="none">
               Explore Our Services
-            </a>
+            </ActionLink>
           </div>
-          <ul className="mt-10 grid max-w-lg grid-cols-3 gap-3 border-t border-line pt-6">
-            {site.googleRating != null ? (
-              <li className="min-w-0">
-                <p className="font-display text-2xl text-navy">{site.googleRating.toFixed(1)}</p>
-                <p className="text-xs leading-5 text-mist">{verified ? "Google rating" : "Reported rating"}</p>
+          <ul className="rise d4 mt-8 flex flex-col gap-3 border-t border-navy/10 pt-5 sm:flex-row sm:flex-wrap sm:gap-x-6">
+            {site.googleRating != null && (
+              <li className="flex items-center gap-2 text-sm font-semibold text-navy">
+                <Star className="size-4 fill-gold text-gold" strokeWidth={1.5} aria-hidden />
+                {site.googleRating.toFixed(1)} Google rating
+                {reported && <span className="font-medium text-mist">Reported</span>}
               </li>
-            ) : null}
-            {site.googleReviewCount != null ? (
-              <li className="min-w-0">
-                <p className="font-display text-2xl text-navy">{site.googleReviewCount}</p>
-                <p className="text-xs leading-5 text-mist">Reviews</p>
+            )}
+            {site.googleReviewCount != null && (
+              <li className="text-sm font-semibold text-navy">
+                {site.googleReviewCount} Google reviews
               </li>
-            ) : null}
-            <li className="min-w-0">
-              <p className="font-display text-2xl text-navy">Home</p>
-              <p className="text-xs leading-5 text-mist">Visits</p>
-            </li>
-          </ul>
-          {site.preview ? <p className="mt-6 max-w-md text-sm leading-6 text-mist">{site.previewNote}</p> : null}
-        </div>
-
-        <div className="relative min-w-0 lg:col-span-5">
-          <div className="portrait-frame aspect-[5/6] sm:aspect-[4/5]">
-            <Portrait image={site.images.hero} priority />
-          </div>
-          <ul className="mt-4 grid grid-cols-2 gap-3 lg:mt-0">
-            <li className="rounded-2xl border border-line bg-white p-4 shadow-[0_12px_32px_rgba(16,42,67,0.07)] lg:absolute lg:left-0 lg:top-8 lg:w-44 lg:-translate-x-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-ink">Home visits</p>
-              <p className="mt-1 font-display text-sm text-navy">Arranged at your home</p>
-            </li>
-            <li className="rounded-2xl bg-navy p-4 text-white lg:absolute lg:right-0 lg:bottom-8 lg:w-48 lg:translate-x-5">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gold">Focus</p>
-              <p className="mt-1 font-display text-sm">Spine, shoulder, knee</p>
+            )}
+            <li className="flex items-center gap-2 text-sm font-semibold text-navy">
+              <House className="size-4 text-lagoon-ink" strokeWidth={1.75} aria-hidden />
+              Home visit services
             </li>
           </ul>
         </div>
-      </Shell>
+        <div className="lg:col-span-5">
+          <div className="relative mx-auto w-full max-w-[440px]">
+            <Photo
+              src={site.images.hero.src}
+              alt={site.images.hero.alt}
+              priority
+              position="center 15%"
+              className="rounded-[24px] shadow-[0_28px_60px_rgba(16,42,67,0.16)]"
+            />
+            <div className="absolute bottom-4 left-4 max-w-[15rem] rounded-2xl border border-line bg-white/95 p-3.5 shadow-[0_12px_30px_rgba(16,42,67,0.12)]">
+              <p className="font-display text-base font-semibold leading-tight text-navy">
+                {site.doctorName}
+              </p>
+              <p className="mt-1 text-sm leading-snug text-mist">{site.professionalTitle}</p>
+            </div>
+            <div className="absolute top-4 right-4 rounded-2xl border border-line bg-white/95 px-3 py-2 text-sm font-semibold text-navy shadow-[0_10px_24px_rgba(16,42,67,0.1)]">
+              Spine • Shoulder • Knee Rehab
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
