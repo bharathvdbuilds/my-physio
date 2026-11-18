@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { ArrowUpRight, Phone } from "lucide-react";
 import { cx } from "@/lib/cx";
-import { hasImage, site } from "@/lib/site";
+import { hasImage, site, withBasePath } from "@/lib/site";
 import { LogoMark, WhatsAppIcon } from "./marks";
 
 export function Wordmark({
@@ -67,7 +67,7 @@ export function ActionLink({
   const external = href.startsWith("http");
   return (
     <a
-      href={href}
+      href={withBasePath(href)}
       className={cx("btn", `btn-${variant}`, className)}
       {...rest}
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}

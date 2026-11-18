@@ -79,6 +79,13 @@ export type SiteConfig = {
   assessmentNote: string;
 };
 
+export function withBasePath(href: string) {
+  if (!href.startsWith("/") || href.startsWith("//")) return href;
+  const base = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
+  if (!base || href === base || href.startsWith(`${base}/`)) return href;
+  return `${base}${href}`;
+}
+
 export const messages = {
   general:
     "Hello Dr. Vikas, I found MY PHYSIO through your website. I would like to enquire about a home physiotherapy appointment.",
@@ -121,7 +128,7 @@ export const site: SiteConfig = {
   googleReviewCount: 30,
   googleRatingStatus: "reported",
   googleBusinessProfileURL: "",
-  publicSiteUrl: "",
+  publicSiteUrl: (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, ""),
   verifiedTestimonials: [],
   hospitalAffiliations: [],
   social: [],
