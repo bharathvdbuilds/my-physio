@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { ArrowUpRight, Phone } from "lucide-react";
 import { cx } from "@/lib/cx";
 import { hasImage, site, withBasePath } from "@/lib/site";
@@ -100,15 +99,20 @@ export function Photo({
   sizes?: string;
 }) {
   if (!hasImage(src)) return null;
+  const imageSrc = withBasePath(src);
   return (
     <div className={cx("relative overflow-hidden bg-ice", ratio, className)}>
-      <Image
-        src={src}
+      {priority ? <link rel="preload" as="image" href={imageSrc} /> : null}
+      {/* next/image drops the GitHub Pages base path for these local files. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={imageSrc}
         alt={alt}
-        fill
-        priority={priority}
         sizes={sizes}
-        className="object-cover"
+        decoding="async"
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
+        className="absolute inset-0 h-full w-full object-cover"
         style={{ objectPosition: position }}
       />
     </div>
